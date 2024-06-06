@@ -32,4 +32,4 @@ python zero_shot.py
 ## Predict result
 1. The resutl of GQA accuracy score is 0.52.
 
-![image](https://github.com/ycchen218/VisionQA-Llama2-OWLViT/blob/master/git_image/QA.png)
+![image](https://github.com/ycchen218/VisionQA-Llama2-OWLViT/blob/main/git_image/QA.png)
