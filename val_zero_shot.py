@@ -1,5 +1,7 @@
 import os
 import json
+import argparse
+
 import _pickle as cPickle
 import torch
 from tqdm import tqdm
@@ -60,7 +62,13 @@ def validation(dataroot, mode,imgs_path):
 
 
 if __name__ == '__main__':
-    imgs_path = os.path.join('GQA_data/GQA/allImages', 'images')
-    # 測試範例
-    acc = validation(dataroot='../data/gqa', mode='testdev', imgs_path=imgs_path)
+    parser = argparse.ArgumentParser(description='Multimodal Model Design for VQA Task')
+    parser.add_argument('--imgs_path', type=str, default='GQA_data/GQA/allImages/images',
+                        help='Path to the all images')
+    parser.add_argument('--dataroot', type=str, default='../data/gqa', help='Path to the data root')
+    parser.add_argument('--mode', type=str, default='testdev', help='Mode for validation')
+
+    args = parser.parse_args()
+
+    acc = validation(dataroot=args.dataroot, mode=args.mode, imgs_path=args.imgs_path)
     print('Accuracy', acc)

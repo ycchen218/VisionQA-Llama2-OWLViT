@@ -1,7 +1,7 @@
 import torch
 from transformers import AutoProcessor, OwlViTForObjectDetection
 from transformers import AutoTokenizer, AutoModelForCausalLM
-
+import argparse
 import warnings
 warnings.filterwarnings("ignore")
 import string
@@ -15,13 +15,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import numpy as np
 
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
+# device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 class ViTLLame13B():
     def __init__(self, yolo_path, device):
-
         self.llm_model = AutoModelForCausalLM.from_pretrained("TheBloke/Llama-2-13B-chat-GPTQ",
                                                               device_map="auto",
                                                               trust_remote_code=False,
@@ -38,6 +36,7 @@ class ViTLLame13B():
         self.stop_words = set(stopwords.words('english'))
         self.yolo = YOLO(yolo_path).to(device)
         self.max_det = 10
+        self.device = device
 
     def remove_punctuation(self,sentence):
         return sentence.translate(str.maketrans('', '', string.punctuation))
@@ -126,7 +125,7 @@ class ViTLLame13B():
 
     def llama2_answer(self, prompt, max_length=256):
         prompt_template = f'''[INST]{self.sys_prompt} {prompt}[/INST]'''
-        tokens = self.llm_tokenizer(prompt_template, return_tensors='pt').input_ids.to(device)
+        tokens = self.llm_tokenizer(prompt_template, return_tensors='pt').input_ids.to(self.device)
         generation_output = self.llm_model.generate(
             tokens,
             do_sample=True,
@@ -192,7 +191,6 @@ class ViTLLame13B():
         boxes_pos = self.denormalize_boxes(boxes_pos, raw_img).detach().cpu().numpy().astype(int).tolist()
         return boxes_pos, pred_scores, pred_cls_names
 
-
     def parse_input(self, input_str, labels_list, boxes_list):
         draw_boxes = []
         draw_labels = []
@@ -246,18 +244,24 @@ class ViTLLame13B():
             self.show_boxes_and_labels_on_image(answer, labels_list, boxes_list, img)
         return answer
 
+def main():
+    parser = argparse.ArgumentParser(description='Multimodal Model Design for VQA Task')
+    parser.add_argument('--img_path', type=str, default='test.jpg', help='Path to the image')
+    parser.add_argument('--yolo_weight', type=str, default='yolo_weight.pt', help='Path to the YOLO weights file')
+    # parser.add_argument('--device', type=str, default='cuda', help='Device to run the model on (e.g., cpu or cuda)')
 
-if __name__ == "__main__":
-    img_path = 'test.jpg'
-    a = cv2.imread(img_path)
-    question_sent = 'What is in the photo?'
-    full_model = ViTLLame13B(yolo_path="yolo_weight.pt", device=device)
+    args = parser.parse_args()
+
+    full_model = ViTLLame13B(yolo_path=args.yolo_weight, device='cuda')
 
     while True:
-        question_sent = input("Text me the question ('q' to quit)：")
+        question_sent = input("Text me the question ('q' to quit): ")
         if question_sent.lower() == 'q':
             print("Quit VQA")
             break
         print("Question: ", question_sent)
-        answer = full_model(img_path, question_sent, show_img=True)
+        answer = full_model(args.img_path, question_sent, show_img=True)
         print("Answer: ", answer)
+
+if __name__ == "__main__":
+    main()
