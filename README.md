@@ -1,7 +1,7 @@
 # VisionQA-Llama2-OWLViT
 
 ## Introduce
-This is a multimodal model design for the Vision Question Answering (VQA) task. It integrates the Llama2 13B, OWL-ViT, and YOLOv8 models.<br>
+This is a multimodal model design for the Vision Question Answering (VQA) task. It integrates the Llama2 13B, OWL-ViT, and YOLOv8 models, utilizing hard prompt tuning.
 ### features:
 1. Llama2 13B handles language understanding and generation.
 2. OWL-ViT identifies objects in the image relevant to the question.
